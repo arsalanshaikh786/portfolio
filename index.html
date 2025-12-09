@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vision Classes Study Material | BookLoop | Notes & PDF Books | Dipali Arote Mam & Shaikh Arsalan</title>
+
+<!-- ✅ SEO DESCRIPTION -->
+<meta name="description" content="Vision Classes Study Material & BookLoop - Free PDF Notes, Books, Question Papers & Solutions for Class 9, 10, 11 & 12. Managed by Dipali Arote Mam & Shaikh Arsalan.">
+
+<!-- ✅ SEO KEYWORDS -->
+<meta name="keywords" content="Vision Classes Study Material, BookLoop, Dipali Arote Mam, Shaikh Arsalan, Class 9 Notes, Class 10 Notes, Class 11 Notes, Class 12 Notes, Physics PDF, Chemistry PDF, Math PDF, Biology PDF, Study Materials">
+
+<meta name="robots" content="index, follow">
+
+<!-- ✅ OPENGRAPH FOR GOOGLE + SOCIAL SHARE -->
+<meta property="og:title" content="Vision Classes Study Material & BookLoop - Free Notes and PDF Books"
+    
+>
+<meta property="og:description" content="Download Free Notes, Books & PDFs from Vision Classes Study Hub and BookLoop. Created by Dipali Arote Mam & Shaikh Arsalan.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="YOUR_LOGO_URL_HERE">
+<meta property="og:url" content="YOUR_WEBSITE_LINK_HERE">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins"}
+    body{background:#eef2ff;}
+
+    nav{
+        background:#4e73df;
+        padding:15px 20px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        color:#fff;
+        font-size:22px;
+        font-weight:600;
+    }
+    nav a{color:#fff;text-decoration:none;font-size:15px;padding:8px 12px;background:#2e59d9;border-radius:6px;}
+
+    .filters{
+        width:90%;
+        margin:20px auto;
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+    select, input{
+        padding:12px;
+        border:1px solid #ccc;
+        border-radius:6px;
+        flex:1;
+        min-width:150px;
+    }
+
+    .container{
+        width:90%;
+        margin:auto;
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:20px;
+    }
+
+    .card{
+        background:#fff;
+        border-radius:12px;
+        padding:12px;
+        text-align:center;
+        box-shadow:0 3px 8px rgba(0,0,0,0.1);
+        transition:.3s;
+    }
+    .card:hover{
+        transform:translateY(-4px);
+        box-shadow:0 7px 15px rgba(0,0,0,0.15);
+    }
+
+    .card img{
+        width:100%;
+        height:200px;
+        object-fit:cover;
+        border-radius:8px;
+    }
+
+    .card h3{
+        font-size:18px;
+        margin:10px 0;
+        color:#1e3c72;
+    }
+
+    .card button{
+        background:#4e73df;
+        color:#fff;
+        border:none;
+        padding:8px 12px;
+        width:100%;
+        border-radius:6px;
+        margin-top:5px;
+    }
+
+    footer{
+        background:#4e73df;
+        color:#fff;
+        text-align:center;
+        padding:12px;
+        margin-top:40px;
+        font-size:14px;
+    }
+</style>
+</head>
+
+<body>
+
+<nav>
+    Study Material Hub.....by Vision•arise...🧿
+    <a href="admin.html">Admin Login</a>
+</nav>
+
+<div class="filters">
+    <input type="text" id="search" placeholder="Search PDF...">
+    
+    <select id="filterClass">
+        <option value="">All Classes</option>
+        <option value="9">Class 9</option>
+        <option value="10">Class 10</option>
+        <option value="11">Class 11</option>
+        <option value="12">Class 12</option>
+    </select>
+
+    <select id="filterSubject">
+        <option value="">All Subjects</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Math">Math</option>
+        <option value="Biology">Biology</option>
+        <option value="English">English</option>
+    </select>
+</div>
+
+<div class="container" id="materialContainer"></div>
+
+<footer>
+© 2025 Vision Classes Study Material Hub | BookLoop | Managed by Dipali Arote Mam | Developed by Shaikh Arsalan
+</footer>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
+  authDomain: "multi-service-app-77dd8.firebaseapp.com",
+  projectId: "multi-service-app-77dd8",
+  storageBucket: "multi-service-app-77dd8.appspot.com",
+  messagingSenderId: "123732555482",
+  appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allData = [];
+const container = document.getElementById("materialContainer");
+const search = document.getElementById("search");
+const filterClass = document.getElementById("filterClass");
+const filterSubject = document.getElementById("filterSubject");
+
+// ✅ Load All Data From Firestore
+async function loadMaterial(){
+    container.innerHTML = "<p>Loading...</p>";
+    const snap = await getDocs(collection(db,"materials"));
+    allData = [];
+    snap.forEach(doc => allData.push(doc.data()));
+    showData(allData);
+}
+
+// ✅ Show Cards
+function showData(data){
+    container.innerHTML = "";
+    if(data.length === 0){
+        container.innerHTML = "<p>No material found</p>";
+        return;
+    }
+    data.forEach(d=>{
+        container.innerHTML += `
+            <div class="card">
+                <img src="${d.image}">
+                <h3>${d.title}</h3>
+                <p>Class: ${d.class}</p>
+                <p>${d.subject}</p>
+                <button onclick="window.open('${d.pdfUrl}','_blank')">View PDF</button>
+            </div>
+        `;
+    });
+}
+
+// ✅ Filters & Search
+function applyFilter(){
+    let text = search.value.toLowerCase();
+    let cls = filterClass.value;
+    let sub = filterSubject.value;
+
+    let filtered = allData.filter(d =>
+        (d.title.toLowerCase().includes(text)) &&
+        (cls ? d.class === cls : true) &&
+        (sub ? d.subject === sub : true)
+    );
+
+    showData(filtered);
+}
+
+search.oninput = applyFilter;
+filterClass.onchange = applyFilter;
+filterSubject.onchange = applyFilter;
+
+loadMaterial();
+
+</script>
+
+</body>
+</html>
