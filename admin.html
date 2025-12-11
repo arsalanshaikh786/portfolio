@@ -1,154 +1,379 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Admin – Study Material</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Resume</title>
   <style>
-    body { font-family: Poppins; background:#f3f3f3; padding:20px; }
-    .box { background:white; padding:20px; border-radius:8px; margin-bottom:20px; }
-    input, select { padding:10px; width:100%; margin:5px 0; border-radius:6px; border:1px solid #ccc; }
-    button { padding:10px; background:#005eff; color:white; border:none; border-radius:6px; width:100%; margin-top:10px; font-size:15px; }
-    table { width:100%; background:white; margin-top:20px; border-radius:8px; border:1px solid #ddd; }
-    th, td { padding:8px; text-align:center; font-size:14px; }
-    th { background:#005eff; color:white; }
+    :root{
+      --accent:#2563eb; --bg:#f5f7fb; --card:#ffffff; --text:#0f172a; --muted:#6b7280;
+    }
+    body{font-family:Inter,system-ui,Segoe UI,Arial;margin:0;background:var(--bg);color:var(--text)}
+    header{background:linear-gradient(90deg,var(--accent),#4f46e5);color:white;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+    .container{max-width:980px;margin:20px auto;padding:18px}
+    .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 8px 28px rgba(2,6,23,0.06)}
+    h2{margin:0 0 8px 0;font-size:18px}
+    label{display:block;margin-top:10px;color:var(--muted);font-size:13px}
+    input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid #e6edf3;margin-top:6px;font-size:14px}
+    .row{display:flex;gap:12px}
+    .row>div{flex:1}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600;border:none;cursor:pointer}
+    .minor{background:#eef2ff;color:#1e40af;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .small{font-size:13px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:16px}
+    @media(max-width:920px){.grid{grid-template-columns:1fr}.row{flex-direction:column}}
+    .hint{font-size:12px;color:#475569;margin-top:6px}
+    .docs-list{list-style:none;padding:0;margin:6px 0}
+    .docs-list li{padding:6px 0}
   </style>
 </head>
 <body>
+  <header>
+    <div style="display:flex;gap:12px;align-items:center">
+      <strong style="font-size:18px">Resume Admin</strong>
+      <small style="opacity:0.9">Manage profile, uploads & docs</small>
+    </div>
+    <div>
+      <a href="index.html" class="btn" style="background:white;color:var(--accent)">Open Public</a>
+    </div>
+  </header>
 
-<h2>📌 Admin – Add Study Material (Paste PDF Link & Image URL)</h2>
+  <main class="container">
+    <section class="card" id="loginCard">
+      <h2>Admin Login</h2>
+      <label>Admin Password</label>
+      <input id="adminPassword" type="password" placeholder="Enter admin password" />
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="loginBtn" class="btn">Login</button>
+        <button id="useDefaultBtn" class="minor">Use default (admin123)</button>
+      </div>
+      <p class="small" style="margin-top:10px">Password stored at Firestore: collection <code>admin</code> doc <code>main</code>, field <code>password</code>. If missing, default <strong>admin123</strong> is accepted and saved.</p>
+      <p id="loginStatus" class="small" style="margin-top:8px;color:crimson"></p>
+    </section>
 
-<div class="box">
-  <input id="title" placeholder="Enter PDF Title">
+    <section class="card" id="panelCard" style="display:none;margin-top:16px">
+      <div class="grid">
+        <div>
+          <h2>Profile & Content</h2>
 
-  <select id="class">
-    <option value="">Select Class</option>
-    <option value="9">Class 9</option>
-    <option value="10">Class 10</option>
-    <option value="11">Class 11</option>
-    <option value="12">Class 12</option>
-  </select>
+          <label>Full Name</label>
+          <input id="inputName" placeholder="Arsalan Shaikh" />
 
-  <select id="subject">
-    <option value="">Select Subject</option>
-    <option value="Physics">Physics</option>
-    <option value="Chemistry">Chemistry</option>
-    <option value="Math">Math</option>
-    <option value="Biology">Biology</option>
-    <option value="English">English</option>
-  </select>
+          <label>Short Intro (2-3 lines)</label>
+          <textarea id="inputIntro" rows="3" placeholder="Short intro"></textarea>
 
-  <input id="imgUrl" placeholder="Paste PDF Image URL (cover photo)">
-  <input id="pdfLink" placeholder="Paste PDF Link">
+          <div class="row" style="margin-top:8px">
+            <div>
+              <label>Profile Photo URL</label>
+              <input id="inputPhotoLink" placeholder="https://..." />
+            </div>
+            <div>
+              <label>Or Upload Photo</label>
+              <input id="inputPhotoFile" type="file" accept="image/*" />
+            </div>
+          </div>
 
-  <button id="addBtn">Save Material</button>
-</div>
+          <label>Resume URL (PDF)</label>
+          <input id="inputResumeLink" placeholder="https://..." />
+          <label>Or Upload Resume (PDF)</label>
+          <input id="inputResumeFile" type="file" accept="application/pdf" />
 
-<table>
-  <thead>
-    <tr>
-      <th>Image</th>
-      <th>Title</th>
-      <th>Class</th>
-      <th>Subject</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
+          <label>Skills (comma separated)</label>
+          <input id="inputSkills" placeholder="HTML, CSS, JavaScript, Firebase" />
 
-<script type="module">
+          <label>Education (one per line)</label>
+          <textarea id="inputEducation" rows="3" placeholder="10th - School (Year)\n12th - College (Year)"></textarea>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+          <label>Projects (one per line: Title - desc - link)</label>
+          <textarea id="inputProjects" rows="4" placeholder="My Project - short desc - https://..."></textarea>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
-  authDomain: "multi-service-app-77dd8.firebaseapp.com",
-  projectId: "multi-service-app-77dd8",
-  storageBucket: "multi-service-app-77dd8.appspot.com",
-  messagingSenderId: "123732555482",
-  appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
-};
+          <label>Certificates / Documents (Label | Link or just link per line)</label>
+          <textarea id="inputDocs" rows="3" placeholder="Certificate Name | https://..."></textarea>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+          <label>Contact Email</label>
+          <input id="inputEmail" placeholder="you@example.com" />
+          <label>Contact Phone</label>
+          <input id="inputPhone" placeholder="+91-XXXXXXXXXX" />
+          <label>External Link (Portfolio)</label>
+          <input id="inputExternalLink" placeholder="https://..." />
 
-const addBtn = document.getElementById("addBtn");
-const tableBody = document.getElementById("tableBody");
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="saveBtn" class="btn">Save to Firestore</button>
+            <button id="saveLocalBtn" class="minor">Save Local</button>
+            <button id="clearBtn" class="minor" title="Overwrite profiles/main with empty object">Clear Profile</button>
+          </div>
 
-// ✅ Add Material
-addBtn.onclick = async ()=>{
-  let title = document.getElementById("title").value;
-  let cls = document.getElementById("class").value;
-  let sub = document.getElementById("subject").value;
-  let img = document.getElementById("imgUrl").value;
-  let link = document.getElementById("pdfLink").value;
+          <p class="hint">Files uploaded will be stored to Firebase Storage and their public URLs saved in Firestore.</p>
+        </div>
 
-  if(!title || !cls || !sub || !img || !link){
-    return alert("⚠ Please fill all fields!");
-  }
+        <aside>
+          <div style="position:sticky;top:18px">
+            <h2>Manage Files</h2>
+            <label>Upload Certificates (multiple)</label>
+            <input id="inputCertFiles" type="file" accept=".pdf,image/*" multiple />
+            <button id="uploadCertsBtn" class="minor" style="margin-top:8px">Upload Certificates</button>
 
-  await addDoc(collection(db,"materials"),{
-    title: title,
-    class: cls,
-    subject: sub,
-    image: img,
-    pdfUrl: link
-  });
+            <h2 style="margin-top:16px">Admin Utilities</h2>
+            <label>Change Admin Password</label>
+            <div class="row">
+              <input id="newPass" type="password" placeholder="New password" />
+              <button id="changePass" class="minor">Change</button>
+            </div>
+            <div style="margin-top:10px">
+              <button id="logoutBtn" class="minor">Logout</button>
+            </div>
 
-  alert("✅ Material Added Successfully!");
-  loadData();
-};
+            <div style="margin-top:14px">
+              <h3 class="small">Preview</h3>
+              <p class="small">Name: <span id="previewName">—</span></p>
+              <p class="small">Email: <span id="previewEmail">—</span></p>
+              <ul id="uploadedDocsList" class="docs-list small"></ul>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
 
-// ✅ Load Data
-async function loadData(){
-  tableBody.innerHTML = "";
-  const snap = await getDocs(collection(db,"materials"));
-  
-  snap.forEach(docu=>{
-    let d = docu.data();
-    tableBody.innerHTML += `
-      <tr>
-        <td><img src="${d.image}" style="width:50px;height:60px;object-fit:cover"></td>
-        <td>${d.title}</td>
-        <td>${d.class}</td>
-        <td>${d.subject}</td>
-        <td>
-          <button onclick="editItem('${docu.id}','${d.title}','${d.pdfUrl}','${d.image}')">Edit</button>
-          <button onclick="deleteItem('${docu.id}')">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
-}
+  <script type="module">
+    // IMPORT FIREBASE HELPERS
+    import {
+      db,
+      storage,
+      uploadFile,
+      getProfileDoc,
+      saveProfileDoc,
+      getAdminPassword,
+      setAdminPassword
+    } from './firebase-config.js';
 
-// ✅ Delete
-window.deleteItem = async (id)=>{
-  if(confirm("Delete this material?")){
-    await deleteDoc(doc(db,"materials",id));
-    loadData();
-  }
-};
+    import { setDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { ref as sref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
-// ✅ Edit
-window.editItem = async (id,title,link,img)=>{
-  let newTitle = prompt("Update Title:", title);
-  let newLink = prompt("Update PDF Link:", link);
-  let newImg = prompt("Update Image URL:", img);
+    // DOM
+    const loginCard = document.getElementById('loginCard');
+    const panelCard = document.getElementById('panelCard');
+    const loginStatus = document.getElementById('loginStatus');
+    const loginBtn = document.getElementById('loginBtn');
+    const useDefaultBtn = document.getElementById('useDefaultBtn');
 
-  if(newTitle && newLink && newImg){
-    await updateDoc(doc(db,"materials",id),{
-      title:newTitle,
-      pdfUrl:newLink,
-      image:newImg
+    const adminPassword = document.getElementById('adminPassword');
+    const inputName = document.getElementById('inputName');
+    const inputIntro = document.getElementById('inputIntro');
+    const inputPhotoLink = document.getElementById('inputPhotoLink');
+    const inputPhotoFile = document.getElementById('inputPhotoFile');
+    const inputResumeLink = document.getElementById('inputResumeLink');
+    const inputResumeFile = document.getElementById('inputResumeFile');
+    const inputSkills = document.getElementById('inputSkills');
+    const inputEducation = document.getElementById('inputEducation');
+    const inputProjects = document.getElementById('inputProjects');
+    const inputDocs = document.getElementById('inputDocs');
+    const inputEmail = document.getElementById('inputEmail');
+    const inputPhone = document.getElementById('inputPhone');
+    const inputExternalLink = document.getElementById('inputExternalLink');
+
+    const saveBtn = document.getElementById('saveBtn');
+    const saveLocalBtn = document.getElementById('saveLocalBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const inputCertFiles = document.getElementById('inputCertFiles');
+    const uploadCertsBtn = document.getElementById('uploadCertsBtn');
+    const uploadedDocsList = document.getElementById('uploadedDocsList');
+
+    const newPass = document.getElementById('newPass');
+    const changePass = document.getElementById('changePass');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const previewName = document.getElementById('previewName');
+    const previewEmail = document.getElementById('previewEmail');
+
+    // session helpers
+    function setSession(){ localStorage.setItem('isAdmin','1'); }
+    function clearSession(){ localStorage.removeItem('isAdmin'); }
+
+    // UI helpers
+    function showPanel(){ loginCard.style.display='none'; panelCard.style.display='block'; }
+    function showLogin(){ loginCard.style.display='block'; panelCard.style.display='none'; }
+
+    // load profile data into admin fields
+    async function loadProfileToAdmin(){
+      try{
+        const data = await getProfileDoc();
+        if(!data) return;
+        inputName.value = data.name || '';
+        inputIntro.value = data.intro || '';
+        inputPhotoLink.value = data.photoLink || '';
+        inputResumeLink.value = data.resumeLink || '';
+        inputSkills.value = (data.skills||[]).join(', ');
+        inputEducation.value = (data.education||[]).join('\\n');
+        inputProjects.value = (data.projects||[]).join('\\n');
+        inputDocs.value = (data.documents||[]).join('\\n');
+        inputEmail.value = data.contactEmail || '';
+        inputPhone.value = data.contactPhone || '';
+        inputExternalLink.value = data.externalLink || '';
+        previewName.textContent = data.name || '—';
+        previewEmail.textContent = data.contactEmail || '—';
+        // show uploaded docs (if in documents field)
+        uploadedDocsList.innerHTML = '';
+        (data.documents||[]).forEach(d=>{
+          const li = document.createElement('li');
+          const parts = d.split('|').map(x=>x.trim());
+          const label = parts[0] || parts[1] || 'Document';
+          const url = parts[1] || parts[0];
+          li.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+          uploadedDocsList.appendChild(li);
+        });
+      }catch(e){
+        console.error('loadProfileToAdmin', e);
+      }
+    }
+
+    // login
+    loginBtn.addEventListener('click', async ()=>{
+      try{
+        loginStatus.textContent = '';
+        const provided = adminPassword.value || '';
+        const stored = await getAdminPassword();
+
+        if(stored === null){
+          // if no password in firestore accept default and save it
+          if(provided === 'admin123'){
+            await setAdminPassword('admin123');
+            setSession(); showPanel(); loadProfileToAdmin();
+            loginStatus.style.color='green'; loginStatus.textContent = 'Logged in (default saved).';
+            return;
+          } else {
+            loginStatus.style.color='crimson'; loginStatus.textContent = 'No admin password set in Firestore. Try default admin123';
+            return;
+          }
+        }
+
+        if(provided === stored){
+          setSession(); showPanel(); loadProfileToAdmin();
+          loginStatus.style.color='green'; loginStatus.textContent = 'Logged in';
+        } else {
+          loginStatus.style.color='crimson'; loginStatus.textContent = 'Wrong password';
+        }
+      }catch(e){
+        console.error('login err', e);
+        loginStatus.style.color='crimson'; loginStatus.textContent = 'Login error: '+e.message;
+      }
     });
-    loadData();
-  }
-};
 
-loadData();
+    useDefaultBtn.addEventListener('click', ()=>{ adminPassword.value = 'admin123'; });
 
-</script>
+    // Save profile (uploads files if provided)
+    saveBtn.addEventListener('click', async ()=>{
+      try{
+        saveBtn.disabled = true;
+        const data = collectFormData();
 
+        // upload photo if selected
+        if(inputPhotoFile.files && inputPhotoFile.files.length){
+          const url = await uploadFile('profilePhotos', inputPhotoFile.files[0]);
+          data.photoLink = url;
+        }
+
+        // upload resume if selected
+        if(inputResumeFile.files && inputResumeFile.files.length){
+          const url = await uploadFile('resumes', inputResumeFile.files[0]);
+          data.resumeLink = url;
+        }
+
+        await saveProfileDoc(data);
+        await loadProfileToAdmin();
+        alert('Saved to Firestore');
+      }catch(e){
+        console.error('save err', e);
+        alert('Save error: '+e.message);
+      } finally { saveBtn.disabled = false; }
+    });
+
+    // Save to localStorage
+    saveLocalBtn.addEventListener('click', ()=>{
+      try{
+        const data = collectFormData();
+        localStorage.setItem('resumeData', JSON.stringify(data));
+        alert('Saved locally (browser)');
+      }catch(e){ alert('Local save error: '+e.message); }
+    });
+
+    // Clear profile (overwrite with empty object)
+    clearBtn.addEventListener('click', async ()=>{
+      if(!confirm('This will clear the profiles/main document. Continue?')) return;
+      try{
+        await setDoc(doc(db,'profiles','main'), {});
+        alert('Profile cleared (overwritten).');
+        loadProfileToAdmin();
+      }catch(e){ alert('Clear error: '+e.message); }
+    });
+
+    // Upload multiple certificates/files
+    uploadCertsBtn.addEventListener('click', async ()=>{
+      const files = inputCertFiles.files;
+      if(!files || !files.length){ alert('Select files first'); return; }
+      uploadCertsBtn.disabled = true;
+      try{
+        const uploaded = [];
+        for(const f of files){
+          const url = await uploadFile('documents', f);
+          uploaded.push(`${f.name} | ${url}`);
+        }
+        // append to documents textarea
+        const old = inputDocs.value ? (inputDocs.value + '\\n') : '';
+        inputDocs.value = old + uploaded.join('\\n');
+        alert('Uploaded certificates — remember to Save to Firestore.');
+      }catch(e){
+        console.error('uploadCerts', e); alert('Upload error: '+e.message);
+      }finally{ uploadCertsBtn.disabled = false; }
+    });
+
+    // Change admin password
+    changePass.addEventListener('click', async ()=>{
+      const np = newPass.value && newPass.value.trim();
+      if(!np || np.length < 4){ alert('Enter new password (min 4 chars)'); return; }
+      try{
+        await setAdminPassword(np);
+        alert('Admin password updated.');
+        newPass.value = '';
+      }catch(e){
+        console.error('changePass', e); alert('Error: '+e.message);
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', ()=>{
+      clearSession();
+      showLogin();
+      location.reload();
+    });
+
+    // Collect form data into object
+    function collectFormData(){
+      return {
+        name: inputName.value || '',
+        intro: inputIntro.value || '',
+        photoLink: inputPhotoLink.value || '',
+        resumeLink: inputResumeLink.value || '',
+        skills: (inputSkills.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+        education: (inputEducation.value||'').split('\\n').map(l=>l.trim()).filter(Boolean),
+        projects: (inputProjects.value||'').split('\\n').map(l=>l.trim()).filter(Boolean),
+        documents: (inputDocs.value||'').split('\\n').map(l=>l.trim()).filter(Boolean),
+        contactEmail: inputEmail.value || '',
+        contactPhone: inputPhone.value || '',
+        externalLink: inputExternalLink.value || ''
+      };
+    }
+
+    // on load: if session present show panel
+    window.addEventListener('load', async ()=>{
+      if(localStorage.getItem('isAdmin')){
+        showPanel();
+        await loadProfileToAdmin();
+      } else {
+        showLogin();
+      }
+    });
+  </script>
 </body>
 </html>
