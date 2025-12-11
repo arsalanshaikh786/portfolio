@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin – Study Material</title>
+  <style>
+    body { font-family: Poppins; background:#f3f3f3; padding:20px; }
+    .box { background:white; padding:20px; border-radius:8px; margin-bottom:20px; }
+    input, select { padding:10px; width:100%; margin:5px 0; border-radius:6px; border:1px solid #ccc; }
+    button { padding:10px; background:#005eff; color:white; border:none; border-radius:6px; width:100%; margin-top:10px; font-size:15px; }
+    table { width:100%; background:white; margin-top:20px; border-radius:8px; border:1px solid #ddd; }
+    th, td { padding:8px; text-align:center; font-size:14px; }
+    th { background:#005eff; color:white; }
+  </style>
+</head>
+<body>
+
+<h2>📌 Admin – Add Study Material (Paste PDF Link & Image URL)</h2>
+
+<div class="box">
+  <input id="title" placeholder="Enter PDF Title">
+
+  <select id="class">
+    <option value="">Select Class</option>
+    <option value="9">Class 9</option>
+    <option value="10">Class 10</option>
+    <option value="11">Class 11</option>
+    <option value="12">Class 12</option>
+  </select>
+
+  <select id="subject">
+    <option value="">Select Subject</option>
+    <option value="Physics">Physics</option>
+    <option value="Chemistry">Chemistry</option>
+    <option value="Math">Math</option>
+    <option value="Biology">Biology</option>
+    <option value="English">English</option>
+  </select>
+
+  <input id="imgUrl" placeholder="Paste PDF Image URL (cover photo)">
+  <input id="pdfLink" placeholder="Paste PDF Link">
+
+  <button id="addBtn">Save Material</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Image</th>
+      <th>Title</th>
+      <th>Class</th>
+      <th>Subject</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
+  authDomain: "multi-service-app-77dd8.firebaseapp.com",
+  projectId: "multi-service-app-77dd8",
+  storageBucket: "multi-service-app-77dd8.appspot.com",
+  messagingSenderId: "123732555482",
+  appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const addBtn = document.getElementById("addBtn");
+const tableBody = document.getElementById("tableBody");
+
+// ✅ Add Material
+addBtn.onclick = async ()=>{
+  let title = document.getElementById("title").value;
+  let cls = document.getElementById("class").value;
+  let sub = document.getElementById("subject").value;
+  let img = document.getElementById("imgUrl").value;
+  let link = document.getElementById("pdfLink").value;
+
+  if(!title || !cls || !sub || !img || !link){
+    return alert("⚠ Please fill all fields!");
+  }
+
+  await addDoc(collection(db,"materials"),{
+    title: title,
+    class: cls,
+    subject: sub,
+    image: img,
+    pdfUrl: link
+  });
+
+  alert("✅ Material Added Successfully!");
+  loadData();
+};
+
+// ✅ Load Data
+async function loadData(){
+  tableBody.innerHTML = "";
+  const snap = await getDocs(collection(db,"materials"));
+  
+  snap.forEach(docu=>{
+    let d = docu.data();
+    tableBody.innerHTML += `
+      <tr>
+        <td><img src="${d.image}" style="width:50px;height:60px;object-fit:cover"></td>
+        <td>${d.title}</td>
+        <td>${d.class}</td>
+        <td>${d.subject}</td>
+        <td>
+          <button onclick="editItem('${docu.id}','${d.title}','${d.pdfUrl}','${d.image}')">Edit</button>
+          <button onclick="deleteItem('${docu.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// ✅ Delete
+window.deleteItem = async (id)=>{
+  if(confirm("Delete this material?")){
+    await deleteDoc(doc(db,"materials",id));
+    loadData();
+  }
+};
+
+// ✅ Edit
+window.editItem = async (id,title,link,img)=>{
+  let newTitle = prompt("Update Title:", title);
+  let newLink = prompt("Update PDF Link:", link);
+  let newImg = prompt("Update Image URL:", img);
+
+  if(newTitle && newLink && newImg){
+    await updateDoc(doc(db,"materials",id),{
+      title:newTitle,
+      pdfUrl:newLink,
+      image:newImg
+    });
+    loadData();
+  }
+};
+
+loadData();
+
+</script>
+
+</body>
+</html>
